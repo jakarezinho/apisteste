@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alojamento Local</title>
+
+
+    <!-- Load Leaflet from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.2/dist/esri-leaflet.js"
+        integrity="sha512-myckXhaJsP7Q7MZva03Tfme/MSF5a6HC2xryjAM4FxPLHGqlh5VALCbywHnzs2uPoF/4G/QVXyYDDSkp5nPfig=="
+        crossorigin=""></script>
+
+    <!-- markercluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+    <script type="application/javascript"
+        src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster-src.js"></script>
+
+    <style>
+        :root {
+            --noir: #000;
+            --blanc: #fff
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 0px;
+            margin: 0px;
+        }
+
+
+
+        #map {
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        .icon {
+            background-color: #fcfa91;
+            padding: 2px;
+            border-color: black;
+            border-radius: 50%;
+            box-shadow: 0 0 0.3em #dfba43;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 1.9em;
+        }
+
+
+        .yellow {
+            background-color: rgb(255, 251, 0);
+            height: 20px;
+            position: absolute;
+            left: -20px;
+            bottom: 20px;
+
+        }
+
+        .orange {
+            background-color: rgb(255, 174, 0);
+            height: 20px;
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+
+        }
+
+        .red {
+            background-color: #ff0000;
+            height: 20px;
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <script type="module">
+
+
+        ////MAP////
+        let map = L.map('map', {
+            zoomControl: false
+        }).setView([39.40748359101977, -9.131741523742676], 8)
+
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoibWFwYXVyYmFubyIsImEiOiJja215cm8xYzIwNHp1Mnh0M2QwZ3puZmkwIn0.ig4jIr-gZzUfuIX8YZB0ug'
+        }).addTo(map);
+        ///zoom control
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+        //// VARS 
+        let latlng
+        const apikey = 'cf98b4065300797eaa31e33945da09df'
+
+
+
+        ////layers map 
+        let AlLayers = L.layerGroup().addTo(map);
+        let thisLayer = L.popup({})
+        const Meteo = L.layerGroup().addTo(map)
+        var markers = L.markerClusterGroup({
+            showCoverageOnHover: false
+        });
+
+
+        let pos = map.getCenter()
+
+        //////SEARCH MAP 
+        map.on('click', (e) => {
+
+            console.log(e.latlng.lat)
+
+            airPolution(e.latlng.lat, e.latlng.lng)
+            meteoOpenWhather(e.latlng.lat, e.latlng.lng)
+
+
+
+        });
+
+
+         /////////////////// POLUTION OPEN WHATHER
+         //// http://openweathermap.org/img/wn/10d@2x.png
+         async function airPolution(lat, lng) {
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow'
+            };
+            
+            try {
+                const url =
+                    `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lng}&appid=${apikey}`
+
+                const response = await fetch(url, requestOptions);
+
+                const json = await response.json();
+                console.log(json)
+
+              
+            } catch (error) {
+                console.log(error)
+
+            }
+
+        }
+
+
+        //////////////////////METEO OPEM WATHER /////
+
+    async function meteoOpenWhather(lat,lng){
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow'
+            };
+
+            try {
+                const url =
+                    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&lang=pt&units=metric&appid=${apikey}`
+
+                const response = await fetch(url, requestOptions);
+
+                const json = await response.json();
+                console.log(json)
+                console.log(json.main.temp)
+            } catch (error) {
+                console.log(error)
+
+
+        }
+    }
+
+
+
+        /////////////////// QUALIDADE AR
+        async function qualidadeAr(lat, lng) {
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow'
+            };
+            try {
+                const url =
+                    `https://api.airvisual.com/v2/nearest_city?lat=${lat}&lon=${lng}&key=90c6f94b-1519-41a3-afeb-e4a6efdd418f`
+
+                const response = await fetch(url, requestOptions);
+
+                if (response.status == 'fail') {
+                    return
+                }
+                const json = await response.json();
+                console.log(json)
+            } catch (error) {
+                console.log(error)
+
+            }
+
+
+
+        }
+
+        ////// GET POSITION USER
+       function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert('no suportwed geolocalizations')
+            }
+        }
+
+        function showPosition(position) {
+
+            qualidadeAr(position.coords.latitude, position.coords.longitude)
+
+        }
+
+
+
+
+        //////METEO IPMA///////////////////////////////////////////////
+        async function IPMA(idDay) {
+            const url = `https://api.ipma.pt/open-data/forecast/meteorology/cities/daily/hp-daily-forecast-day${idDay}.json`
+            const response = await fetch(url);
+            const json = await response.json();
+
+            json.data.map((loc, index) => {
+                let latlng = [loc.latitude, loc.longitude]
+                let icon = `<img src="icons/w_ic_d_${loc.idWeatherType}anim.svg"  height="40px" width="40px">`
+
+
+                let meteo = L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: 'my-labels', // Set class for CSS styling
+                        html: `<div>${icon} <h1> ${loc.tMax}º</h1>${loc.tMin}º</div>`,
+                        iconAnchor: [10, -5]
+                    })
+                });
+                Meteo.addLayer(meteo);
+
+            })
+        }
+
+        /////// METEO AVISOS 
+        async function avisos(color) {
+            const url = `https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json`
+            const response = await fetch(url);
+            const json = await response.json();
+
+            let name = []
+            let text = []
+            json.filter(el => el.awarenessLevelID === color).map((id, index) => {
+                name.push(id.awarenessTypeName)
+                text.push(id.text)
+                let uniqname = [...new Set(name)]
+                let uniqtext = [...new Set(text)]
+
+                console.log(id)
+                let popup = `${uniqname.join(' / ')} - ${uniqtext.join(' ')}  <p class=""> De: ${id.startTime} Até; ${id.endTime}</p> `
+                idsAvisos(id.idAreaAviso).then(country => {
+                    country.map((y, index) => {
+
+                        let ylatlng = [y.latitude, y.longitude]
+
+                        let alerte = L.marker(ylatlng, {
+                            icon: L.divIcon({
+                                className: 'my-labels', // Set class for CSS styling
+                                html: `<div><span class="${color}"> Alerte! </span></div>`,
+                                iconAnchor: [10, -5]
+                            })
+                        })
+
+                        Meteo.addLayer(alerte)
+                        alerte.addEventListener('click', (e) => {
+                            thisLayer.setLatLng(e.latlng)
+                                .setContent(popup)
+                            Meteo.addLayer(thisLayer);
+
+
+                        })
+
+
+                    })
+
+
+                });
+            });
+
+
+
+        }
+
+        ////////  METEO IDS AVISOS
+
+        async function idsAvisos(idAviso) {
+
+            const url = `https://api.ipma.pt/open-data/distrits-islands.json`
+            const response = await fetch(url);
+            const json = await response.json();
+
+            let country = json.data.filter(el => el.idAreaAviso === idAviso);
+            return country
+        }
+
+
+        IPMA(0)
+        avisos('yellow')
+        avisos('orange')
+        avisos('red')
+      //  getLocation()
+
+
+    </script>
+
+    <div id="map"></div>
+
+
+</body>
+
+</html>

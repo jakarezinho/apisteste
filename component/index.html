@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+
+        customElements.define("geo-pt", class extends HTMLElement {
+            constructor() {
+                super();
+                this.attachShadow({ mode: "open" });
+            }
+
+            static get observedAttributes() { return ["loading", "municipios"]; }
+            get loading() {
+                return JSON.parse(this.getAttribute("loading"));
+            }
+            set loading(v) {
+                this.setAttribute("loading", JSON.stringify(v));
+            }
+            get municipios() {
+                return JSON.parse(this.getAttribute("municipios"));
+            }
+            set municipios(v) {
+                this.setAttribute("municipios", JSON.stringify(v));
+            }
+            async fetchMunicipios(url) {
+                this.loading = true;
+                const response = await fetch(url);
+                const json = await response.json();
+                this.municipios = json;
+                this.loading = false;
+            }
+
+            async connectedCallback() {
+
+                const lat = this.getAttribute("lat")
+                const lng = this.getAttribute("lng")
+
+                await this.fetchMunicipios(`https://geoptapi.org/gps?lat=${lat}&lon=${lng}&detalhes=1`);
+            }
+
+            disconnectedCallback() {
+            }
+            attributeChangedCallback(attrName, oldVal, newVal) {
+                this.render();
+            }
+
+            render() {
+                if (this.loading) {
+                    this.shadowRoot.innerHTML = `Loading...`;
+                } else {
+                    this.shadowRoot.innerHTML = ` 
+                    
+                    <style>
+                        .pt,h3 {
+                        background: #1E88E5;
+                        color: white;
+                        padding: 2rem 4rem;
+                        border: 0;
+                        font-size: 1.5rem;
+                        }
+                        </style>
+                        <h3>
+                            <slot name="title">Star Wars Planets</slot></h3>
+                   <p class="pt"> ${this.municipios.concelho}</p>
+                  
+
+                     ${console.log(this.municipios)}`
+                }
+            }
+
+
+
+        })
+    </script>
+</head>
+
+<body>
+
+    <geo-pt lat="39.406966954694234" lng="-9.137945699780824">
+        <span slot="title">Municipios</span>
+    </geo-pt>
+
+</body>
+</body>
+
+</html>

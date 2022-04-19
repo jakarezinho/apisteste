@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alojamento Local</title>
+
+
+    <!-- Load Leaflet from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.2/dist/esri-leaflet.js"
+        integrity="sha512-myckXhaJsP7Q7MZva03Tfme/MSF5a6HC2xryjAM4FxPLHGqlh5VALCbywHnzs2uPoF/4G/QVXyYDDSkp5nPfig=="
+        crossorigin=""></script>
+
+    <!-- markercluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+    <script type="application/javascript"
+        src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster-src.js"></script>
+
+    <style>
+        :root {
+            --noir: #000;
+            --blanc: #fff
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .display {
+            position: fixed;
+            top: 10px;
+            left: 20px;
+
+
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        .icon {
+            background-color: #fcfa91;
+            padding: 2px;
+            border-color: black;
+            border-radius: 50%;
+            box-shadow: 0 0 0.3em #dfba43;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 1.9em;
+        }
+
+        .alc {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 500px;
+            height: 100%;
+            z-index: 100;
+            background-color: azure;
+            padding: 10px;
+            overflow-y: scroll;
+
+        }
+
+        .loading {
+            position: absolute;
+            min-height: 100vh;
+            width: 100%;
+            /* height of the browser viewport */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+
+        }
+
+
+        .loading p {
+            z-index: 200;
+            background-color: var(--noir);
+            padding: 5px;
+            color: var(--blanc);
+            display: none;
+        }
+
+        .yellow {
+            background-color: rgb(255, 251, 0);
+            height: 20px;
+            position: absolute;
+            left: -20px;
+            bottom: 20px;
+
+        }
+
+        .orange {
+            background-color: rgb(255, 174, 0);
+            height: 20px;
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+
+        }
+
+        .red {
+            background-color: #ff0000;
+            height: 20px;
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <script type="module">
+
+
+        ////MAP////
+        let map = L.map('map', {
+            zoomControl: false
+        }).setView([39.40748359101977, -9.131741523742676], 13)
+
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoibWFwYXVyYmFubyIsImEiOiJja215cm8xYzIwNHp1Mnh0M2QwZ3puZmkwIn0.ig4jIr-gZzUfuIX8YZB0ug'
+        }).addTo(map);
+        ///zoom control
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+        //// VARS 
+        let latlng
+        let piclocal
+        let search = document.getElementById('search')
+        let envia = document.getElementById('envia')
+        const loading = document.getElementById('loading')
+        const infos = document.getElementById('infos')
+        const sinalicon = L.icon({
+            iconUrl: 'https://twemoji.maxcdn.com/v/13.0.0/72x72/1f6a9.png',
+            iconSize: [45, 45], // size of the icon
+        });
+
+        ////layers map 
+        let AlLayers = L.layerGroup().addTo(map);
+        let thisLayer = L.popup({})
+        const Meteo = L.layerGroup().addTo(map)
+        var markers = L.markerClusterGroup({
+            showCoverageOnHover: false
+        });
+
+
+        let pos = map.getCenter()
+
+        //////// Add remove marker sinal
+        function marker_sinal() {
+            if (piclocal != undefined) {
+                map.removeLayer(piclocal);
+            }
+        }
+
+        ////// GET POSITION USER
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert('no suportwed geolocalizations')
+            }
+        }
+
+        function showPosition(position) {
+            getInfos(position.coords.latitude, position.coords.longitude)
+            console.log(position.coords.latitude, position.coords.longitude)
+
+        }
+
+
+        ////// SEARCH MAP
+        envia.addEventListener('click', async (e) => {
+            e.preventDefault()
+            markers.clearLayers()
+            fetchAl(search.value)
+
+        })
+
+
+        //////SEARCH MAP 
+        map.on('click', (e) => {
+            markers.clearLayers()
+            console.log(e.latlng.lat)
+
+            getInfos(e.latlng.lat, e.latlng.lng)
+
+
+
+        });
+
+        ///// CLOSE INDOW ZOOM CHANGE
+
+        map.on('zoom', (e) => {
+
+            map.removeLayer(thisLayer)
+
+        });
+
+
+
+
+        //// GeoptApi/////
+        //// GET CITY LAT LANG 
+        async function getInfos(lat, lng) {
+            /////// marker sinal
+            marker_sinal()
+            piclocal = L.marker([lat, lng], {
+                title: 'aqui',
+                icon: sinalicon,
+            }).addTo(map)
+            ///////////
+            const response = await fetch(`https://geoptapi.org/gps?lat=${lat}&lon=${lng}&detalhes=1`)
+            if (response.status != 200) {
+                loading.style.display = 'block'
+                loading.innerHTML = 'Sem alojamentos a apresentar neste local'
+                search.value = ''
+                infos.innerHTML = ''
+                return
+            }
+
+            const munip = await response.json()
+            search.value = munip.concelho
+            fetchAl(munip.concelho)
+            console.log(munip)
+        }
+
+
+        ///// FETCH  AL ALOJAMENTOS
+        ///https://agserver.sg.min-economia.pt/arcgis/rest/services/TDP/OpenData_Alojamento_Turistico/MapServer/6/query?outFields=*&f=json&inSR=4326&outSR=4326&where=DataAberturaPublico >= CURRENT_TIMESTAMP 
+        // https://sniambgeoogc.apambiente.pt/getogc/rest/services/Visualizador/QAR/MapServer/0/query?f=json&outFields=*&spatialRel=esriSpatialRelIntersects&where=data =  CURRENT_DATE
+        async function fetchAl(loc) {
+
+            markers.clearLayers()
+            const url = loc != null ? `https://agserver.sg.min-economia.pt/arcgis/rest/services/TDP/OpenData_Alojamento_Turistico/MapServer/6/query?outFields=*&inSR=4326&outSR=4326&f=json&where=concelho='${loc}'` :
+                `https://agserver.sg.min-economia.pt/arcgis/rest/services/TDP/OpenData_Alojamento_Turistico/MapServer/6/query?outFields=*&f=json&inSR=4326&outSR=4326&where=DataAberturaPublico >= CURRENT_TIMESTAMP`
+            loading.style.display = 'block'
+            loading.innerHTML = 'Loading...'
+
+            const receitas = document.getElementById('receitas')
+            receitas.innerHTML = ''
+
+            const options = { year: 'numeric', month: 'long' };
+            const response = await fetch(url);
+            const json = await response.json();
+
+            loc != null ? infos.innerHTML = `Concelho: ${loc} numero de al ${json.features.length}` : infos.innerHTML = `<h1>Novos alojamentos Abertos este ano  ${json.features.length}</h1>`
+            var bounds = L.latLngBounds()
+            json.features.map((item, index) => {
+                console.log(item)
+
+                const data = new Date(item.attributes.DataAberturaPublico).toLocaleDateString('pt-PT', options);
+                latlng = [item.geometry.y, item.geometry.x]
+
+                bounds.extend(latlng)
+                let uri = encodeURI(`https://www.google.com/search?q=${item.attributes.Denominacao} Alojamento local ${item.attributes.Freguesia} ${item.attributes.LOCALIDADE}`)
+                var content_window = `<div><span>${item.attributes.NrRNAL}</span><br><h3> <strong>${item.attributes.Denominacao}</strong></h3>Capacidade:${item.attributes.NrUtentes} pessoas </br>Tipo:${item.attributes.Modalidade}<br>Localidade:${item.attributes.LOCALIDADE}<br> Freguesia: ${item.attributes.Freguesia} <br> Codigo Postal: ${item.attributes.CodigoPostal}<br>Morada: ${item.attributes.Endereco}<br>
+                    Data de abertura:${data}<p><strong>Selo Clean Safe: ${item.attributes.SeloCleanSafe}</strong><br> Faixa Costeira: ${item.attributes.NUTSIIICosteiras}<br> Rede Nature 2000: ${item.attributes.RedeNatura2000Sitios}</p><p>IN GOOGLE: <a href="${uri.replace('&','')}" target="blank"> ${item.attributes.Denominacao}</a></p>
+                    <p>directions: <a href="https://www.google.com/maps/dir/?api=1&origin=${item.attributes.Endereco},${item.attributes.Freguesia},${item.attributes.LOCALIDADE}" target="blank"> ${item.attributes.Endereco}</a></p></div>`
+
+                let myTextLabel = L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: 'my-labels', // Set class for CSS styling
+                        html: `<div class="icon"><img  src='https://twemoji.maxcdn.com/v/13.0.0/72x72/1f3e0.png'  height="20px" width="20px"></div>`,
+                        iconAnchor: [10, -5]
+                    })
+
+
+                });
+                markers.addLayer(myTextLabel)
+
+                myTextLabel.addEventListener('click', (e) => {
+                    thisLayer.setLatLng(e.latlng)
+                        .setContent(content_window)
+
+                    //buildingLayers.clearLayers(); // remove existing markers
+                    map.panTo(e.latlng);
+                    //thisLayer.addTo(mymap);
+
+                    AlLayers.addLayer(thisLayer);
+                })
+
+
+                const receitaslist = document.createElement('div')
+                receitaslist.classList.add("munip")
+
+                receitaslist.innerHTML = `<p><span>${index + 1}</span>Nº${item.attributes.NrRNAL}+ ${item.attributes.Denominacao} - ${item.attributes.Modalidade}- freguesia -  ${item.attributes.Freguesia} -//// morada ${item.attributes.Endereco}</p>`
+                receitas.appendChild(receitaslist)
+
+
+            })
+
+            map.addLayer(markers)
+
+            map.fitBounds(bounds)
+            loading.style.display = 'none'
+
+        }
+
+
+        fetchAl()
+
+        //getInfos(pos.lat, pos.lng)
+      //  getLocation()
+    </script>
+    <div class="loading">
+        <p id="loading"></p>
+    </div>
+    <div id="map"></div>
+
+    <div class="display">
+        <input type="text" id="search"><button id="envia"> search</button>
+        <div id="infos"></div>
+
+    </div>
+    <div class="al" id="receitas">
+        
+    </div>
+<p>dados actualizados 16 de Abril de 2021</p>
+</body>
+
+</html>

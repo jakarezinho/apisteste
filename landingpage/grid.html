@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *,
+        ::after,
+        ::before {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+        .cara {
+            width: 100%;
+            height: auto;
+        }
+
+        .container {
+
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-gap: 1rem;
+
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+            grid-gap: 1rem;
+
+        }
+
+        .container>div {
+            background: #eb4d4b;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+
+
+            padding: 5rem 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+            background: #ffffff;
+            color: #ffffff;
+        }
+
+
+        .container-container {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            background-color: yellowgreen;
+        }
+
+        .content-container {
+
+            display: flex;
+            max-width: 1200px;
+            padding: 20px 10px;
+            margin: 20px;
+            background-color: #d7dade;
+
+        }
+
+        .right {
+            width: 500px;
+            background-color: #759ac9;
+        }
+
+        .left {
+            width: calc(100% - 100px);
+            background-color: #7cd47b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div> 1</div>
+        <div> 2</div>
+        <div> 3</div>
+        <div> 4</div>
+    </div>
+    <ul class="grid">
+        <li><img class="cara" src="images/superman1.jpg"></li>
+        <li><p>calendario</p>
+            <iframe
+                src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Europe%2FLisbon&showTitle=0&showNav=1&showTabs=0&showCalendars=0&showDate=0&mode=AGENDA&showPrint=0&showTz=1&src=OWRpa3VldHY4cHAyMWVnNmNtaWJ1Z2poNThAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=dXVyMjZxOHA1ZThvNjBoZWg4cGg5MXI0NGdAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&src=YW83OTNmaTRkOHE0cDRkN2w5OXNxNDhiZW9AZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%23E4C441&color=%23AD1457&color=%230B8043"
+                 width=100% height="400" frameborder="0" scrolling="no"></iframe></li>
+
+
+    </ul>
+    <div class="container-container">
+
+        <div class="content-container">
+            <div class="left">
+                <h1>Some text assdSs SsSsSs sSsSS</h1>
+            </div>
+            <div class="right">Some text</div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

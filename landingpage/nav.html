@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+
+    <style>
+         :root {
+            --noir: #222;
+            --rose: #f08686;
+            --noirfort: #111;
+            --white: #fff;
+            --gris: #ccc;
+            --bleu: #0080ff;
+            --bleub: #4169e1;
+            --bleufonce: #00008b;
+            --gris2: #444;
+        }
+        /* Basic styling */
+        
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+        
+        body {
+            font-family: sans-serif;
+            font-size: 16px;
+        }
+        
+        nav {
+            background: var(--rose);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            transition: 0.4s;
+        }
+        
+        a {
+            color: var(--white);
+            text-decoration: none;
+        }
+        
+        .menu,
+        .submenu {
+            list-style-type: none;
+        }
+        
+        .logo {
+            font-size: 20px;
+            padding: 7.5px 10px 7.5px 0;
+        }
+        
+        .item {
+            padding: 10px;
+        }
+        
+        .item.button {
+            padding: 9px 5px;
+        }
+        
+        .item:not(.button) a:hover,
+        .item a:hover::after {
+            color: var(--gris);
+        }
+        /* Mobile menu */
+        
+        nav,
+        .petit {
+            padding: 5px 10px;
+        }
+        
+        .menu {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .menu li a {
+            display: block;
+            padding: 15px 5px;
+        }
+        
+        .menu li.subitem a {
+            padding: 15px;
+        }
+        
+        .toggle {
+            order: 1;
+            font-size: 20px;
+        }
+        
+        .item.button {
+            order: 2;
+        }
+        
+        .item {
+            order: 3;
+            width: 100%;
+            text-align: center;
+            display: none;
+        }
+        
+        .active .item {
+            display: block;
+        }
+        
+        .button.secondary {
+            /* divider between buttons and menu links */
+            border-bottom: 1px var(--gris2) solid;
+        }
+        /* Submenu up from mobile screens */
+        
+        .submenu {
+            display: none;
+        }
+        
+        .submenu-active .submenu {
+            display: block;
+        }
+        
+        .has-submenu i {
+            font-size: 12px;
+        }
+        
+        .has-submenu>a::after {
+            font-family: "Font Awesome 5 Free";
+            font-size: 12px;
+            line-height: 16px;
+            font-weight: 900;
+            content: "\f078";
+            color: var(--white);
+            padding-left: 5px;
+        }
+        
+        .subitem a {
+            padding: 10px 15px;
+        }
+        
+        .submenu-active {
+            background-color: var(--noirfort);
+            border-radius: 3px;
+        }
+        /* Tablet menu */
+        
+        @media all and (min-width: 700px) {
+            .menu {
+                justify-content: center;
+            }
+            .logo {
+                flex: 1;
+            }
+            .item.button {
+                width: auto;
+                order: 1;
+                display: block;
+            }
+            .toggle {
+                flex: 1;
+                text-align: right;
+                order: 2;
+            }
+            /* Button up from tablet screen */
+            .menu li.button a {
+                padding: 10px 15px;
+                margin: 5px 0;
+            }
+            .button a {
+                background: var(--bleu);
+                border: 1px var(--bleub) solid;
+            }
+            .button.secondary {
+                border: 0;
+            }
+            .button.secondary a {
+                background: transparent;
+                border: 1px var(--bleu) solid;
+            }
+            .button a:hover {
+                text-decoration: none;
+            }
+            .button:not(.secondary) a:hover {
+                background: var(--bleub);
+                border-color: var(--bleufonce);
+            }
+        }
+        /* Desktop menu */
+        
+        @media all and (min-width: 960px) {
+            nav {
+                padding: 25px 15px;
+            }
+            .menu {
+                align-items: flex-start;
+                flex-wrap: nowrap;
+                background: none;
+            }
+            .logo {
+                order: 0;
+                font-size: 35px;
+            }
+            .item {
+                order: 1;
+                position: relative;
+                display: block;
+                width: auto;
+            }
+            .button {
+                order: 2;
+            }
+            .submenu-active .submenu {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 68px;
+                background: var(--noirfort);
+            }
+            .toggle {
+                display: none;
+            }
+            .submenu-active {
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <ul class="menu">
+            <li class="logo"><a href="#">Creative Mind Agency</a></li>
+            <li class="item"><a href="#">Home</a></li>
+            <li class="item"><a href="#">About</a></li>
+            <li class="item has-submenu">
+                <a tabindex="0">Services</a>
+                <ul class="submenu">
+                    <li class="subitem"><a href="#">Design</a></li>
+                    <li class="subitem"><a href="#">Development</a></li>
+                    <li class="subitem"><a href="#">SEO</a></li>
+                    <li class="subitem"><a href="#">Copywriting</a></li>
+                </ul>
+            </li>
+            <li class="item has-submenu">
+                <a tabindex="0">Plans</a>
+                <ul class="submenu">
+                    <li class="subitem"><a href="#">Freelancer</a></li>
+                    <li class="subitem"><a href="#">Startup</a></li>
+                    <li class="subitem"><a href="#">Enterprise</a></li>
+                </ul>
+            </li>
+            <li class="item"><a href="#">Blog</a></li>
+            <li class="item"><a href="#">Contact</a>
+            </li>
+            <li class="item button"><a href="#">Log In</a></li>
+            <li class="item button secondary"><a href="#">Sign Up</a></li>
+            <li class="toggle"><a href="#"><i class="fas fa-bars"></i></a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>title</h1>
+        <p><b>This example demonstrates how to shrink a navigation bar when the user starts to scroll the page.</b></p>
+        <p>Scroll down this frame to see the effect!</p>
+        <p>Scroll to the top to remove the effect.</p>
+        <p><b>Note:</b> We have also made the navbar responsive, resize the browser window to see the effect.</p>
+        <p>Lorem ipsum dolor dummy text to enable scrolling, sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+        sasasasasasasa
+        <p><b>This example demonstrates how to shrink a navigation bar when the user starts to scroll the page.</b></p>
+        <p>Scroll down this frame to see the effect!</p>
+        <p>Scroll to the top to remove the effect.</p>
+        <p><b>Note:</b> We have also made the navbar responsive, resize the browser window to see the effect.</p>
+        <p>Lorem ipsum dolor dummy text to enable scrolling, sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        <p><b>This example demonstrates how to shrink a navigation bar when the user starts to scroll the page.</b></p>
+        <p>Scroll down this frame to see the effect!</p>
+        <p>Scroll to the top to remove the effect.</p>
+        <p><b>Note:</b> We have also made the navbar responsive, resize the browser window to see the effect.</p>
+        <p>Lorem ipsum dolor dummy text to enable scrolling, sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+
+            <p><b>This example demonstrates how to shrink a navigation bar when the user starts to scroll the page.</b>
+            </p>
+            <p>Scroll down this frame to see the effect!</p>
+            <p>Scroll to the top to remove the effect.</p>
+            <p><b>Note:</b> We have also made the navbar responsive, resize the browser window to see the effect.</p>
+            <p>Lorem ipsum dolor dummy text to enable scrolling, sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+
+
+        <p><b>This example demonstrates how to shrink a navigation bar when the user starts to scroll the page.</b>
+        </p>
+        <p>Scroll down this frame to see the effect!</p>
+        <p>Scroll to the top to remove the effect.</p>
+        <p><b>Note:</b> We have also made the navbar responsive, resize the browser window to see the effect.</p>
+        <p>Lorem ipsum dolor dummy text to enable scrolling, sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+        <p><b>This example demonstrates how to shrink a navigation bar when the user starts to scroll the page.</b>
+        </p>
+        <p>Scroll down this frame to see the effect!</p>
+        <p>Scroll to the top to remove the effect.</p>
+        <p><b>Note:</b> We have also made the navbar responsive, resize the browser window to see the effect.</p>
+        <p>Lorem ipsum dolor dummy text to enable scrolling, sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+    </div>
+    <script>
+        const toggle = document.querySelector(".toggle");
+        const menu = document.querySelector(".menu");
+        const items = document.querySelectorAll(".item");
+        const nav = document.querySelector('nav');
+        const logo = document.querySelector('.logo')
+
+        /* Toggle mobile menu */
+        function toggleMenu() {
+            if (menu.classList.contains("active")) {
+                menu.classList.remove("active");
+                toggle.querySelector("a").innerHTML = "<i class='fas fa-bars'></i>";
+            } else {
+                menu.classList.add("active");
+                toggle.querySelector("a").innerHTML = "<i class='fas fa-times'></i>";
+            }
+        }
+
+        /* Activate Submenu */
+        function toggleItem() {
+            if (this.classList.contains("submenu-active")) {
+                this.classList.remove("submenu-active");
+            } else if (menu.querySelector(".submenu-active")) {
+                menu.querySelector(".submenu-active").classList.remove("submenu-active");
+                this.classList.add("submenu-active");
+            } else {
+                this.classList.add("submenu-active");
+            }
+        }
+
+        /* Close Submenu From Anywhere */
+        function closeSubmenu(e) {
+            let isClickInside = menu.contains(e.target);
+
+            if (!isClickInside && menu.querySelector(".submenu-active")) {
+                menu.querySelector(".submenu-active").classList.remove("submenu-active");
+            }
+        }
+        /* Event Listeners */
+        toggle.addEventListener("click", toggleMenu, false);
+        for (let item of items) {
+            if (item.querySelector(".submenu")) {
+                item.addEventListener("click", toggleItem, false);
+            }
+            item.addEventListener("keypress", toggleItem, false);
+        }
+        document.addEventListener("click", closeSubmenu, false);
+
+
+        ///// 
+        window.onscroll = function() {
+            scrollFunction()
+        };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
+                nav.classList.add('petit')
+                logo.style.fontSize = "20px";
+            } else {
+                nav.classList.remove('petit')
+                logo.style.fontSize = "35px";
+            }
+        }
+    </script>
+</body>
+
+</html>

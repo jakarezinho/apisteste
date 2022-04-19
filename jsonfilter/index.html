@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul id='receitas'></ul>
+    <script>
+
+
+        async function fetchReceitas(url, municipio) {
+            const receitas = document.getElementById('receitas')
+       receitas.innerHTML = ''
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+            const response = await fetch(url);
+            const json = await response.json();
+            console.log(json.d)
+            var result = json.d.filter(function (obj, index) {
+                return obj.dscautarquia === municipio
+            })
+
+            result.map((item, index) => {
+              const receitaslist = document.createElement('li')
+               receitaslist.classList.add("munip")
+
+                var data = new Date(item.Timestamp).toLocaleDateString('pt-PT', options);
+                console.log(item)
+                console.log(data)
+                receitaslist.innerHTML= `Data: ${data} Finaciamento Europeu : ${(item.financiamentouniaoeuropeia/1000000).toFixed(2)} milhião € Receitas Totais : ${item.receitastotais} € `
+                 receitas.appendChild(receitaslist)
+            })
+
+
+        }
+
+        fetchReceitas('https://dados.gov.pt/s/resources/receitas-municipais-2016/20180514-160512/AIIRM2016.json', 'CALDAS DA RAINHA')
+    </script>
+</body>
+
+</html>

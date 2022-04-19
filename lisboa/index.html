@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lisboa </title>
+
+    <!-- Load Leaflet from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.2/dist/esri-leaflet.js"
+        integrity="sha512-myckXhaJsP7Q7MZva03Tfme/MSF5a6HC2xryjAM4FxPLHGqlh5VALCbywHnzs2uPoF/4G/QVXyYDDSkp5nPfig=="
+        crossorigin=""></script>
+
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+        }
+    </style>
+</head>
+<div id="loading" class="loading"></div>
+<div id="map"></div>
+
+<body>
+
+    <script type="module">
+
+        ////MAP////
+        let map = L.map('map', {
+            zoomControl: false
+        }).setView([38.7240553753973, -9.14003518646685], 14)
+
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoibWFwYXVyYmFubyIsImEiOiJja215cm8xYzIwNHp1Mnh0M2QwZ3puZmkwIn0.ig4jIr-gZzUfuIX8YZB0ug'
+        }).addTo(map);
+        ///zoom control
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+
+        //////////////VAR 
+
+        let geral
+
+        //loading 
+        const loading = document.getElementById('loading')
+
+        /// Emel
+        const service_t = 'https://emel.city-platform.com/opendata/traffic/closures/list'
+        const file_t = 'transito.json'
+        ////waze
+        const service_w = 'https://emel.city-platform.com/opendata/traffic/waze/jams/list'
+        const file_w = 'waze_tafic.json'
+        ////parkings zone
+        const service_pk = 'https://emel.city-platform.com/opendata/parking/zone/list'
+        const file_pk = 'park_zone.json'
+
+        ////parking lugares json
+        const service_pk_lots = 'https://emel.city-platform.com/opendata/parking/lots'
+        const file_pk_lots = 'park_places.json'
+
+        /////gira https://emel.city-platform.com/opendata/gira/station/list
+        const service_gira = 'https://emel.city-platform.com/opendata/gira/station/list'
+        const file_gira = 'gira.json'
+
+
+
+
+        //////// TRANSITO OBRAS
+
+        async function transito() {
+
+
+            function onEachFeature(feature, layer) {
+
+                console.log(feature)
+                if (feature.properties) {
+                    const duree = feature.properties.periodos_condicionamentos[0].date_max - feature.properties.periodos_condicionamentos[0].date_m
+                    let popupContent = `<h3>HERE / AQUI </h3> <p> Local:${feature.properties.morada} <br> Motivo:${feature.properties.motivo}
+                             <br> datas:${feature.properties.periodos_condicionamentos[0].date_min} / ${feature.properties.periodos_condicionamentos[0].date_max} </p>`
+
+                    layer.bindPopup(popupContent);
+
+
+                }
+
+            }
+            ////// FUNCTION STYLE LINE 
+            function styleLine(feature) {
+                return feature.properties.periodos_condicionamentos[0].is_interrupted == true ?
+                    { color: "#ff0000", weight: 5, opacity: 0.20 } : { color: "#faff00", weight: 5, opacity: 0.65 }
+
+            }
+            ////// FUNCTION TRANSITO 
+
+
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow',
+            }
+            try {
+
+                const url = `data.php?service=${service_t}&file=${file_t}`
+
+                const response = await fetch(url, requestOptions);
+                const data = await response.json();
+
+                geral = L.geoJSON(data, {
+
+                    style: styleLine,
+
+                    onEachFeature: onEachFeature,
+
+
+
+                });
+                geral.addData(data)
+                map.addLayer(geral)
+
+            } catch (error) {
+                console.log(error)
+
+
+
+            }
+        }
+
+        ////// WAZE
+
+        async function waze_transito() {
+
+
+            function onEachFeature(feature, layer) {
+
+                console.log(feature)
+                if (feature.properties) {
+
+                    let popupContent = `<h3>Aqui </h3> speed ${feature.properties.speed}`
+                    layer.bindPopup(popupContent);
+
+
+                }
+
+            }
+            ////// FUNCTION STYLE LINE 
+
+
+            function style_color(feature) {
+                let value = feature.properties.speed
+                console.log(value > 1)
+
+
+                return value == 0 ? { color: "#ff0000", weight: 5, opacity: 0.20 } : { color: "#FBFF1F", weight: 5, opacity: 0.50 }
+
+
+
+
+
+            }
+
+
+            ////// FUNCTION TRANSITO 
+
+
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow',
+            }
+            try {
+
+                const url = `data.php?service=${service_w}&file=${file_w}`
+
+                const response = await fetch(url, requestOptions);
+                const data = await response.json();
+
+                geral = L.geoJSON(data, {
+
+
+                    style: style_color,
+                    onEachFeature: onEachFeature,
+
+                });
+                geral.addData(data)
+                map.addLayer(geral)
+
+            } catch (error) {
+                console.log(error)
+
+
+
+            }
+        }
+
+        ////// PARKINGS ZONE
+
+        async function parkings() {
+
+
+            function onEachFeature(feature, layer) {
+
+                console.log(feature)
+                if (feature.properties) {
+                    let popupContent = `<h4> aqui..</h4> ${feature.properties.tarifa}`
+
+
+                    layer.bindPopup(popupContent);
+
+
+                }
+
+            }
+            ////// FUNCTION STYLE LINE 
+
+            ////// FUNCTION TRANSITO 
+
+
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow',
+            }
+            try {
+
+                const url = `data.php?service=${service_pk}&file=${file_pk}`
+
+                const response = await fetch(url, requestOptions);
+                const data = await response.json();
+
+                geral = L.geoJSON(data, {
+
+
+
+                    onEachFeature: onEachFeature,
+                    style: function (feature) {
+                        switch (feature.properties.tarifa) {
+                            case 'VERMELHA': return { color: "#ff0000" };
+                            case 'VERDE': return { color: "#0de811" };
+                            case 'AMARELA': return { color: "#fbff1f" };
+                            case 'BAIRROS': return { color: "#ff66d8" };
+                        }
+                    }
+
+
+
+
+                });
+                geral.addData(data)
+                map.addLayer(geral)
+
+            } catch (error) {
+                console.log(error)
+
+
+
+            }
+        }
+
+        ////// PARKING PLACES ZONE 
+
+        async function parking_zone() {
+
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow',
+            }
+
+            try {
+
+                const url = `data.php?service=${service_pk_lots}&file=${file_pk_lots}`
+
+                const response = await fetch(url, requestOptions);
+                const data = await response.json();
+
+                console.log(data)
+
+            } catch (error) {
+                console.log(error)
+
+            }
+        }
+
+        ////////////// PARKINGS PLACES GPS
+
+        async function parking_place_gps(lat, lng) {
+
+
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow',
+            }
+
+            try {
+                const response = await fetch(`data.php?lat=${lat}&lng=${lng}`, requestOptions);
+                const data = await response.json();
+
+                console.log(data)
+
+            } catch (error) {
+                console.log(error)
+
+            }
+        }
+
+
+        ///// GIRA 
+
+        async function gira() {
+
+            ///// POP UP
+            function onEachFeature(feature, layer) {
+
+
+                if (feature.properties) {
+
+                    let popupContent = `<h3>HERE / AQUI </h3>`
+
+                    layer.bindPopup(popupContent);
+
+
+                }
+
+            }
+            ////// FUNCTION STYLE LINE 
+
+            function point_texte(feature, latlng) {
+                console.log(feature)
+                let infos = `${feature.properties.num_bicicletas}`
+                return new L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: 'my-div-icon',
+                        html: infos
+                    })
+                })
+            }
+
+            ////// FUNCTION TRANSITO 
+
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow',
+            }
+            try {
+
+                const url = `data.php?service=${service_gira}&file=${file_gira}`
+
+                const response = await fetch(url, requestOptions);
+                const data = await response.json();
+
+                geral = L.geoJSON(data, {
+
+                    onEachFeature: onEachFeature,
+                    pointToLayer: point_texte,
+
+
+
+                });
+                geral.addData(data)
+                map.addLayer(geral)
+
+            } catch (error) {
+                console.log(error)
+
+
+
+            }
+        }
+
+
+        // transito()
+        // waze_transito()
+        parkings()
+       // parking_zone()
+        //parking_place_gps(38.753703,-9.14457)
+     // gira()
+    </script>
+
+</body>
+
+</html>

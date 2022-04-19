@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .home-section {
+            position: relative;
+            z-index: 90;
+            padding-top: 110px;
+            padding-bottom: 110px;
+            background: url(images/bg0.jpg) top left no-repeat;
+            background-size: cover;
+
+        }
+
+        .baner {
+
+            color: var(--blanc);
+            margin-bottom: 10%;
+
+
+
+        }
+
+        .baner h1 {
+            font-size: 8em;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .home-section-overlay {
+            width: 100%;
+            background: var(--noir);
+            opacity: 0.80;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+
+        }
+
+        .row {
+
+            width: 1100px;
+            padding-bottom: 40px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .row>div.baner {
+            position: relative;
+        }
+
+        .embed-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            box-shadow: 0 0 10px 10px;
+            background-color: var(--noir);
+
+        }
+
+        .embed-container iframe,
+        .embed-container object,
+        .embed-container embed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+        }
+
+
+        
+    </style>
+
+</head>
+
+<body>
+    <div class="home-section">
+
+        <div class="home-section-overlay"></div>
+        <div class="container">
+
+            <div class="row">
+                <div class="baner">
+                    <h1>As melhores sardinhas </h1>
+                    <p>We created the Do4Others nonprofit organization to give each kid a computer and accessories to
+                        get a proper education through video calls or in-class lessons. Join us and be part of this
+                        important mission.</p>
+                </div>
+                <div class="embed-container"><iframe src="https://www.youtube.com/embed/z9Ul9ccDOqE"
+                        frameborder="0"></iframe></div>
+
+
+                        
+            </div>
+        </div>
+
+    </div>
+
+
+
+</body>
+
+</html>

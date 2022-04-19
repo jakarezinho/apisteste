@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+
+	<style>
+		.lightbox {
+			background-color: rgba(0, 0, 0, 0.8);
+			overflow: scroll;
+			position: fixed;
+			display: none;
+			z-index: 1;
+			bottom: 0;
+			right: 0;
+			left: 0;
+			top: 0;
+		}
+
+		.lightbox-container {
+			position: relative;
+			max-width: 960px;
+			margin: 7% auto;
+			display: block;
+			padding: 0 3%;
+			height: auto;
+			z-index: 10;
+		}
+
+		@media screen and (max-width: 768px) {
+			.lightbox-container {
+				margin-top: 10%;
+			}
+		}
+
+		@media screen and (max-width: 414px) {
+			.lightbox-container {
+				margin-top: 13%;
+			}
+		}
+
+		.lightbox-content {
+			box-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+		}
+
+		.lightbox-close {
+			text-transform: uppercase;
+			background: transparent;
+			position: absolute;
+			font-weight: 300;
+			font-size: 12px;
+			display: block;
+			border: none;
+			color: white;
+			top: -22px;
+			right: 3%;
+		}
+
+		.video-container {
+			padding-bottom: 56.25%;
+			position: relative;
+			padding-top: 30px;
+			overflow: hidden;
+			height: 0;
+		}
+
+		.video-container iframe,
+		.video-container object,
+		.video-container embed {
+			position: absolute;
+			height: 100%;
+			width: 100%;
+			left: 0;
+			top: 0;
+		}
+
+		body {
+			background: #efefef;
+		}
+
+		#container {
+			border-radius: 4px;
+			max-width: 300px;
+			height: auto;
+			padding: 50px;
+			background: white;
+			margin: 100px auto;
+		}
+
+		#playme {
+			background: #007fed;
+			text-transform: uppercase;
+			font-weight: 300;
+			border: none;
+			color: white;
+			padding: 10px 15px;
+			display: inline-block;
+			font-size: 14px;
+			margin: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="container">
+		<center>
+			<p>Open the lightbox with below button</p>
+			<button id="playme" onclick="revealVideo('video','youtube')">Play Video</button>
+		</center>
+	</div>
+
+	<div id="video" class="lightbox" onclick="hideVideo('video','youtube')">
+		<div class="lightbox-container">
+			<div class="lightbox-content">
+
+				<button onclick="hideVideo('video','youtube')" class="lightbox-close">
+					Close | ✕
+				</button>
+				<div class="video-container">
+					<iframe id="youtube" width="960" height="540"
+						src="https://www.youtube.com/embed/WsptdUFthWI?showinfo=0" frameborder="0"
+						allowfullscreen></iframe>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<script>
+		// Function to reveal lightbox and adding YouTube autoplay
+		// Function to reveal lightbox and adding YouTube autoplay
+		function revealVideo(div, video_id) {
+			var video = document.getElementById(video_id).src;
+			document.getElementById(video_id).src = video + '&autoplay=1'; // adding autoplay to the URL
+			document.getElementById(div).style.display = 'block';
+		}
+
+		// Hiding the lightbox and removing YouTube autoplay
+		function hideVideo(div, video_id) {
+			var video = document.getElementById(video_id).src;
+			var cleaned = video.replace('&autoplay=1', ''); // removing autoplay form url
+			document.getElementById(video_id).src = cleaned;
+			document.getElementById(div).style.display = 'none';
+		}
+	</script>
+</body>
+
+</html>

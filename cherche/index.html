@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>map</title>
+
+    <!-- Load Leaflet from CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="js/autocomplete.js"></script>
+    <link rel="stylesheet" href="css/autocomplete.css">
+    <style>
+         :root {
+            --blanc: #FFF;
+            --active: #f11313;
+            --noir: #000;
+            --shadow: #2e2d2d;
+            --shadow_map: text-shadow: 1px 1px 0 var(--shadow), 1px 2px 0 var(--shadow), 3px 3px 0 var(--shadow), -1px -1px 0 var(--shadow), 1px -1px 0 var(--shadow), -1px 1px 0 var(--shadow), 0 1px 0 var(--shadow);
+            --tableau: #83786a;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            z-index: 0;
+        }
+        
+        .search {
+            position: absolute;
+            left: 25px;
+            z-index: 100;
+        }
+        
+        .search input {
+            border: none;
+            outline: none;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 1.35em;
+            text-align: center;
+            font-weight: 800;
+            border-radius: 5px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="search">
+        <input type="text" autocomplete="off" id="search" class="full-width" placeholder="Procurar">
+    </div>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map', {
+            zoomControl: false
+        }).setView([39.4039, -9.1336], 14);
+
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            minZoom: 15,
+            id: 'mapbox/streets-v11', ///'mapbox/outdoors-v11', mapbox://styles/mapbox/streets-v11
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoibWFwYXVyYmFubyIsImEiOiJja215cm8xYzIwNHp1Mnh0M2QwZ3puZmkwIn0.ig4jIr-gZzUfuIX8YZB0ug'
+        }).addTo(map);
+        ///zoom control
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+
+
+        //////////////////// CHERCHE///
+        // minimal configure
+        new Autocomplete('search', {
+                    // default selects the first item in
+                    // the list of results
+                    selectFirst: true,
+
+                    // The number of characters entered should start searching
+                    howManyCharacters: 2,
+
+                    // onSearch
+                    onSearch: ({
+                        currentValue
+                    }) => {
+                        // You can also use static files
+                        // const api = '../static/search.json'
+                        const api = `https://nominatim.openstreetmap.org/search?format=geojson&limit=5&city=${encodeURI(currentValue)}`;
+                        //const api = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=${encodeURI(currentValue)}&maxSuggestions=5&f=pjson`;
+
+                        return new Promise((resolve) => {
+                            fetch(api)
+                                .then(response => response.json())
+                                .then(data => {
+                                    resolve(data.features)
+                                    console.log(data)
+
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                })
+                        })
+                    },
+                    // nominatim GeoJSON format parse this part turns json into the list of
+                    // records that appears when you type.
+                    onResults: ({
+                            currentValue,
+                            matches,
+                            template
+                        }) => {
+                            const regex = new RegExp(currentValue, 'gi');
+
+                            // if the result returns 0 we
+                            // show the no results element
+                            return matches === 0 ? template : matches
+                                .map((element) => {
+                                        return `
+          <li class="loupe">
+            <p>
+              ${element.properties.display_name.replace(regex, (str) => `<b>${str}</b>`)}
+            </p>
+          </li> `;
+      }).join('');
+  },
+
+  // we add an action to enter or click
+  onSubmit: ({ object }) => {
+    const { display_name } = object.properties;
+    const cord = object.geometry.coordinates;
+
+    // custom id for marker
+    const customId = Math.random();
+
+    // create marker and add to map
+    const marker = L.marker([cord[1], cord[0]], {
+      title: display_name,
+      id: customId
+    })
+      .addTo(map)
+      .bindPopup(display_name);
+
+    // sets the view of the map
+    map.setView([cord[1], cord[0]], 8);
+
+    // removing the previous marker
+    // if you want to leave markers on
+    // the map, remove the code below
+    map.eachLayer(function (layer) {
+      if (layer.options && layer.options.pane === "markerPane") {
+        if (layer.options.id !== customId) {
+          map.removeLayer(layer);
+        }
+      }
+    });
+  },
+
+  // get index and data from li element after
+  // hovering over li with the mouse or using
+  // arrow keys ↓ | ↑
+  onSelectedItem: ({ index, element, object }) => {
+    console.log('onSelectedItem:', index, element, object);
+  },
+  
+  // the method presents no results element
+  noResults: ({ currentValue, template }) => template(`<li>No results found: "${currentValue}"</li>`),
+});
+    </script>
+</body>
+
+</html>
